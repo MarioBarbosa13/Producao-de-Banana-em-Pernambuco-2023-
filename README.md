@@ -5,4 +5,3 @@ Os dados foram visualizados através de gráficos e mapas choropleth.
 
 ## Links
 - Notebook interativo no Colab (https://colab.research.google.com/drive/1zcZ5I6uQ3Bq31ussrv-QgrkRmELb9UYD?usp=sharing)
-- [Visualizar imagens dos gráficos](outputs/)
