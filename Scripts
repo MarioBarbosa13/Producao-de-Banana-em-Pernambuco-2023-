@@ -1,1 +1,60 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import geopandas as gpd
+import os
 
+os.makedirs("Outputs", exist_ok=True)
+
+df_banana = pd.read_csv("data/hectares_2023.csv")
+
+# -----------------------------
+# Gráfico de barras
+# -----------------------------
+plt.figure(figsize=(10,6))
+plt.bar(df_banana['Município'], df_banana['Hectares_Colhidos'], color='forestgreen')
+plt.title("Hectares de Banana Colhidos por Município (2023)", fontsize=14)
+plt.xlabel("Município")
+plt.ylabel("Hectares Colhidos")
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.tight_layout()
+plt.savefig("Outputs/barras_municipios.png", dpi=300)
+plt.show()
+
+# -----------------------------
+# Gráfico de pizza
+# -----------------------------
+total_por_regiao = df_banana.groupby("Região")["Hectares_Colhidos"].sum()
+plt.figure(figsize=(6,6))
+total_por_regiao.plot(kind='pie', autopct='%1.1f%%', startangle=90, colors=['#FFA500','#87CEFF'])
+plt.ylabel('')
+plt.title("Distribuição da Produção por Região")
+plt.tight_layout()
+plt.savefig("Outputs/pizza_regiao.png", dpi=300)
+plt.show()
+
+# -----------------------------
+# Ranking de municípios
+# -----------------------------
+ranking = df_banana.sort_values(by='Hectares_Colhidos', ascending=False)
+print("\n📊 Ranking dos municípios por hectares colhidos:")
+print(ranking[['Município','Hectares_Colhidos']])
+
+# -----------------------------
+# Mapa choropleth
+# -----------------------------
+url = "https://raw.githubusercontent.com/tbrugz/geodata-br/master/geojson/geojs-26-mun.json"
+gdf = gpd.read_file(url)
+
+municipios_interesse = df_banana["Município"].str.upper().tolist()
+gdf_pe = gdf[gdf["name"].str.upper().isin(municipios_interesse)]
+
+gdf_pe = gdf_pe.merge(df_banana, left_on="name", right_on="Município")
+
+fig, ax = plt.subplots(1,1, figsize=(10,8))
+gdf_pe.plot(column="Hectares_Colhidos", cmap="YlGn", legend=True, edgecolor="black", ax=ax)
+ax.set_title("Hectares de Banana Colhidos por Município (PE, 2023)", fontsize=14)
+ax.axis("off")
+plt.tight_layout()
+plt.savefig("Outputs/mapa_choropleth.png", dpi=300)
+plt.show()
